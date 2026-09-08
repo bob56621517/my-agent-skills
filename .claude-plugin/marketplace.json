@@ -17,6 +17,13 @@
       "description": "Git 上下文准备工作流——开始/继续议题或任务时自动检测分支、同步远程、管理议题切换（纯 Skill 插件，不捆绑 MCP server；远端操作按需调用平台 MCP/CLI）",
       "author": { "name": "bob56621517" },
       "category": "development"
+    },
+    {
+      "name": "local_coding_agent",
+      "source": "./skills/local_coding_agent",
+      "description": "PM（项目经理）把编码工作派发给本地 codex/claude 的 coding agent——并行 worktree、子分支合并回父基线、冲突回解、双档失败预算，最终返回父议题 PR 或本地分支树+留痕报告",
+      "author": { "name": "bob56621517" },
+      "category": "development"
     }
   ]
 }
