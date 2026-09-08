@@ -1,0 +1,14 @@
+{
+  "name": "my-agent-skills",
+  "interface": {
+    "displayName": "My Agent Skills"
+  },
+  "plugins": [
+    {
+      "source": "local",
+      "path": "./",
+      "policy": "AVAILABLE",
+      "category": "Development"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "my-agent-skills",
+  "description": "bob56621517 的个人 Agent 技能市场",
+  "owner": {
+    "name": "bob56621517",
+    "email": "bob56621517@gmail.com"
+  },
+  "metadata": {
+    "description": "个人自研 Agent 技能集合，基于 Agent Skills 开放标准（SKILL.md），可被 Claude Code / Codex / OpenClaw / skills-cli 四端安装。",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "git-context-prep",
+      "source": "./skills/git-context-prep",
+      "description": "Git 上下文准备工作流——开始/继续议题或任务时自动检测分支、同步远程、管理议题切换（纯 Skill 插件，不捆绑 MCP server；远端操作按需调用平台 MCP/CLI）",
+      "author": { "name": "bob56621517" },
+      "category": "development"
+    }
+  ]
+}

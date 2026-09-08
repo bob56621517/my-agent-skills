@@ -1,0 +1,6 @@
+{
+  "name": "my-agent-skills",
+  "version": "1.0.0",
+  "description": "个人自研 Agent 技能集合，基于 Agent Skills 开放标准（SKILL.md），vendor-neutral 兜底清单。",
+  "skills": "./skills/"
+}

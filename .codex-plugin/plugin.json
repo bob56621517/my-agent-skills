@@ -1,0 +1,14 @@
+{
+  "name": "my-agent-skills",
+  "version": "1.0.0",
+  "description": "个人自研 Agent 技能集合，基于 Agent Skills 开放标准（SKILL.md），可被 Claude Code / Codex / OpenClaw / skills-cli 四端安装。",
+  "author": "bob56621517",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "My Agent Skills",
+    "shortDescription": "bob56621517 的个人自研 Agent 技能集",
+    "category": "Development",
+    "capabilities": ["git", "workflow"]
+  }
+}
