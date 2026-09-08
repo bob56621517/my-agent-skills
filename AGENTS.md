@@ -5,7 +5,8 @@ bob56621517 的个人自研 Agent 技能市场。本仓库存放可移植的 Age
 ## 如何读取本仓库
 
 - **技能内容**：`skills/<name>/SKILL.md`（frontmatter 的 `name` + `description`，正文为指令）。`scripts/`、`references/` 为可选支撑文件。
-- **清单**：`.claude-plugin/` 供 Claude Code、`.codex-plugin/` 供 Codex、根 `plugin.json` 为厂商中立兜底。三处清单指向同一份 `skills/` 内容，不各自复制技能。
+- **清单**：`.claude-plugin/` 供 Claude Code、`.codex-plugin/` 供 Codex、根 `plugin.json` 为厂商中立兜底。三处清单都指向同一份 `skills/` 内容，不各自复制技能。
+- **可移植**：四端共用同一份 `SKILL.md`，默认不写 Claude 私有字段（如 `context: fork`）或 Codex 私有字段（如 `agents/openai.yaml`）；只有某端独有需求时才加各自文件。
 - **安装**：见 `README.md` 各端命令。
 
 ## 新增技能约定（固定三步）

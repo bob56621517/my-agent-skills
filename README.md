@@ -27,8 +27,7 @@ my-agent-skills/
 ├── skills/
 │   └── <skill-name>/         # 每个技能一个目录
 │       └── SKILL.md          #   技能本体（四端唯一内容源）
-├── AGENTS.md                 # 供 Codex / OpenClaw 等读取的说明
-├── CLAUDE.md                 # 仓库内工作说明
+├── AGENTS.md                 # 约定与说明（所有 agent 通用，唯一约定文件）
 ├── README.md
 └── LICENSE
 ```
