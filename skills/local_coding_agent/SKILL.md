@@ -25,8 +25,9 @@ description: >-
 
 ## 三条原则(调度与放权)
 
-1. **用当前环境默认的 codex / claude,不为调度的 agent 新建隔离的 home/环境目录,
-   强制复用本地环境现有程序;不用新认证或 API key。**
+1. **用当前环境默认的 codex / claude,不为调度的 agent 新建隔离的运行时/认证环境
+   (独立 HOME、配置目录、新认证或 API key);强制复用本机现有程序与凭据。
+   工作区(worktree)隔离不在此限**——每个分支独立 checkout,但复用同一套本机运行时。
 2. **必须运行到后台,不允许阻塞前台**;前台只留句柄(进程 PID / 日志路径)。
 3. **全权限、无沙箱放权**——委托即放权:不设沙箱、不限制其
    工具/网络/MCP,由 agent 自行处置;密钥走环境变量,不写进代码或 commit。
@@ -49,18 +50,27 @@ description: >-
 依赖树决定派发节奏:被依赖(阻塞)任务不派发。
 - **判据**:spec 文本、基线分支、分支名、依赖树、平台 CLI 已齐,用户一次确认完成。
 
-### Phase 2 建 worktree
-每个分支从基线 `git worktree add`;远程先 `git fetch --prune`。不校验初始 HEAD——
-git 合并冲突检测即安全网。
-- **判据**:每分支有独立 worktree;记录了路径/分支/基线分支。
+### Phase 2 建 worktree / 判定采纳
+先为每个目标分支判定 workspace:
+- **采纳(不建 worktree)**:目标分支**已被 checkout**——要么已是当前 cwd 的 HEAD,
+  要么被某个已存在 worktree 占用。直接复用该 workspace,记录"采纳";不校验初始 HEAD,
+  git 合并冲突检测即安全网。
+- **新建 worktree**:其余分支(含子议题新分支、未被 checkout 的分支)一律从基线
+  `git worktree add`;远程先 `git fetch --prune`。记录"新建"。
+记录每个 worker 的 workspace 路径 / 分支 / 基线分支 / 来源("新建"或"采纳")。
+- **判据**:每 worker 有明确 workspace;新建者有独立 worktree;均记录了路径/分支/基线/来源。
 
 ### Phase 3 派发(后台)
-在该 worktree 后台拉起 coding agent(优先 `codex`,不可执行/报错则换 `claude`),
+在该 workspace 后台拉起 coding agent(优先 `codex`,不可执行/报错则换 `claude`),
 **按原则 3 全权限无沙箱运行**、用 agent 内置/默认配置,不注入环境变量、不新建
-二次认证、不阻塞前台。**派发/重派前先 `git fetch` 父并 `git reset --hard` 对齐
-当前最新父基线**(不冻结在记录基线),不带上一轮坏 commit;重派同样对齐最新父。
+二次认证、不阻塞前台。
+- **记录 zero-point**:派发前记下该分支当前 commit,作为 Phase 5 git 闸基准;并 `git fetch` 父。
+- **对齐父基线,按来源区分**:**新建**分支——`git reset --hard` 到最新父顶点(不冻结在
+  记录基线),不带上一轮坏 commit;重派同样对齐最新父。**采纳**分支——**决不 reset**,
+  父有前进则 `git merge`(非 reset)对齐;重派若确需丢弃上轮坏 commit,由 agent 在自身分支
+  `git reset --hard <上个好commit>` 处理,或上报调用者定夺。
 指令要点见文末「Worker prompt」。依依赖树只派发未被阻塞的子任务。
-- **判据**:coding agent 是各自 worktree 内活的后台进程,前台留有可查句柄。
+- **判据**:coding agent 是各自 workspace 内活的后台进程,前台留有可查句柄;已记录 zero-point。
 
 ### Phase 4 看护(后台)
 派发后立即返回,由你**定时看护**——周期取句柄(进程/日志/输出),判两件事
@@ -74,13 +84,13 @@ git 合并冲突检测即安全网。
 - **判据**:每 worker 报 **done** 或 **failed**;`failed` 只能由"连续 2 次跑偏或卡死(非网络)"触发。
 
 ### Phase 5 git 闸(轻量)
-对 done 的 worker,只验 git 层:
+对 done 的 worker,只验 git 层(基准一律用派发时记录的 **zero-point**,不看 merge-base):
 1. 产物存在——远程模式:须已 push 远端且分支存在;本地模式:本地分支存在。
-2. 相对基线非空 diff。
-3. ≥1 个 commit。
-4. 范围/覆盖面——只改议题范围内的文件(看 `git diff --stat` 文件路径,不读代码)。
-   **diff 基线一律 `git merge-base <子分支> <最新父顶点>`,不冻结在记录基线**——
-   父被推进后仅统计该子分支真正引入的改动。
+2. `zero-point..HEAD` 非空 diff。
+3. `zero-point..HEAD` ≥1 个 commit。
+4. 范围/覆盖面——只改议题范围内的文件(看 `git diff --stat <zero-point> HEAD` 的文件路径,
+   不读代码)。zero-point 只统计本次运行真正引入的改动;新建分支的 zero-point 即 reset 到的
+   父顶点,采纳分支的 zero-point 即接手时的定点,两者天然区分。
 - **判据**:过闸;越界改动/空 diff 等**正确性问题**退回 Phase 3 重派(不计失败、
   不受上限);git 冲突不算正确性、留在 Phase 6。
 
@@ -96,9 +106,10 @@ git 合并冲突检测即安全网。
 - **判据**:所有子任务已由远端 PR 合入父;顶层 PR 已合入基础分支。
 
 ### Phase 7 清理与报告
-自动移除已合并的子 worktree;持久化状态(留痕):远程议题评论 / 网关 send /
-本地基线下落文件;返回**人读摘要 + 机读 JSON**(议题/分支/PR、各分支 state、失败列表)。
-- **判据**:worktree 已清理、状态已持久化、双格式报告已返回。
+只清理**本 run 新建**的 worktree(含已合并的子议题);**采纳的 workspace(cwd/既存)一律
+不动**,不删分支。持久化状态(留痕):远程议题评论 / 网关 send / 本地基线下落文件;
+返回**人读摘要 + 机读 JSON**(议题/分支/PR、各分支 state、来源(新建/采纳)、失败列表)。
+- **判据**:自建 worktree 已清理、采纳 workspace 保留、状态已持久化、双格式报告已返回。
 
 ## 失败处理
 
