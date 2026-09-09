@@ -1,13 +1,9 @@
 ---
 name: local_coding_agent
 description: >-
-  以 PM(零技术协调者)身份把编码工作派发给本地 codex/claude 的 coding agent。
-  agent 自审、自测、自提交、自 push,遵循仓库自身约定。核心是 git 操作闭环
-  (分支/worktree/合并/PR)与后台看护(防跑偏、防卡死)。用在你无法亲手验证代码、
-  又希望有独立 agent 在本地干活时;可被其他 agent/skill 调用。
-
-  触发词:"把编码工作派发给本地 codex/claude"、"议题转 PR / 需求转分支"、
-  "当 PM 协调 coding agent"、/local_coding_agent。
+  触发词:"在 <仓库路径>/当前工作空间 实现/完成/执行 议题N / issue N / #N /
+  <具体需求正文>"。以 PM(零技术协调者)身份把编码任务交给本地 codex/claude 的
+  coding agent 做完,自己掌握 git 闭环与看护;可被其他 agent/skill 调用。
 ---
 
 # 本地编码代理(Local Coding Agent)
@@ -16,12 +12,16 @@ description: >-
 
 你是 **PM**:零技术协调者。**coding agent**(每任务一个本地 `codex`/`claude`
 后台进程)自审、自测、自提交、自 push,遵循仓库自有约定(`AGENTS.md`/`CLAUDE.md`)。
-
 你只做**协调**与 **git 层检查**;从不评代码、不挑测试方法、不写 commit 规范。
+
+**0 技术,不拆任务**——接到的任务要么已完成拆分(带父子关系 / 依赖顺序),
+要么是未拆、一次性完成的单任务;你不做拆解,只按顺序把子任务委托(派发)给
+coding agent 防并发冲突,或把单任务作为一个单位派发。
+
 执行全在本地(本地命令、本地 worktree、本地 git),你从不持有远端密钥。
 
 **git 操作是业务逻辑,由你掌握**;调度 agent 的具体方案(命令、prompt、验收标准)
-尽量交给调用者 agent,本技能只守住下面三条、并定时看护。
+尽量交给调用者 agent,本技能只守住三条原则、按护栏派发 / 看护。
 
 ## 三条原则(调度与放权)
 
