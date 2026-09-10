@@ -19,9 +19,9 @@
       "category": "development"
     },
     {
-      "name": "local_coding_agent",
-      "source": "./skills/local_coding_agent",
-      "description": "PM（项目经理）把编码工作派发给本地 codex/claude 的 coding agent——并行 worktree、子分支合并回父基线、冲突回解、双档失败预算，最终返回父议题 PR 或本地分支树+留痕报告",
+      "name": "delegate-coding",
+      "source": "./skills/delegate-coding",
+      "description": "PM（项目经理）把编码工作依次委托给本地/宿主的 coding agent——单车道串行、唯一特性分支、每完成即 push 成检查点、失败存档到 wip 死支并跳过依赖子树，最终交付唯一 PR 与双格式报告",
       "author": { "name": "bob56621517" },
       "category": "development"
     }
